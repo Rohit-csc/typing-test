@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>King</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      background: linear-gradient(to bottom, #000000, #1c3a5e);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .main-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 40px;
+      margin-bottom: 20px;
+    }
+    .logo {
+      height: 100px;
+      margin-bottom: 0;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+    .logo:hover { transform: scale(1.1); filter: drop-shadow(0 0 10px #4fc3f7); }
+    h1 {
+      color: #4fc3f7;
+      font-size: 2.2rem;
+      margin-bottom: 0;
+      text-shadow: 0 0 10px #2196f3;
+      transition: text-shadow 0.3s ease;
+    }
+    h1:hover {
+      text-shadow: 0 0 20px #4fc3f7, 0 0 30px #2196f3;
+    }
+    .main-controls-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    #paragraph-type-select, #timer-input {
+      font-size: 1rem;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      background: #2a2f4a;
+      color: white;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234fc3f7%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-13z%22%2F%3E%3C%2Fsvg%3E');
+      background-repeat: no-repeat;
+      background-position: right 15px top 50%;
+      background-size: .65em auto;
+      padding-right: 40px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    #paragraph-type-select:hover, #timer-input:hover {
+      background: #3c4260;
+      transform: scale(1.02);
+    }
+    #countdown-timer {
+      font-size: 1.5rem;
+      color: red;
+    }
+    .typing-box {
+      background: rgba(17, 20, 38, 0.85);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 14px;
+      padding: 30px;
+      width: 90%;
+      max-width: 800px;
+      box-shadow: 0 0 20px rgba(79,195,247,0.2);
+      overflow-y: auto;
+      height: 350px;
+      margin-bottom: 20px;
+      transition: box-shadow 0.3s ease;
+    }
+    .typing-box:hover {
+      box-shadow: 0 0 30px rgba(79,195,247,0.6);
+    }
+    .typing-box.is-hovered {
+        box-shadow: 0 0 35px rgba(79, 195, 247, 0.7);
+    }
+    .text-display {
+      font-size: 1.3rem;
+      line-height: 2;
+      word-wrap: break-word;
+      display: block;
+    }
+    .text-display span.correct { color: #4fc3f7; }
+    .text-display span.incorrect { color: #ff5252; }
+    textarea {
+      width: 90%;
+      max-width: 850px;
+      height: 80px;
+      font-size: 1.2rem;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(17, 20, 38, 0.85);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      color: white;
+      resize: none;
+      display: block;
+      margin-bottom: 20px;
+      transition: box-shadow 0.3s ease, background 0.4s;
+    }
+    textarea:hover {
+      box-shadow: 0 0 25px rgba(79,195,247,0.4);
+      background: #1c213f;
+    }
+    textarea.is-hovered {
+        box-shadow: 0 0 35px rgba(79, 195, 247, 0.7);
+        background: #1c213f;
+    }
+    .stats {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        color: #81d4fa;
+    }
+    #restart-btn {
+      background-color: #4fc3f7;
+      color: #000000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    #restart-btn:hover {
+      background-color: #81d4fa;
+      transform: scale(1.05);
+    }
+    canvas {
+        max-width: 100%;
+        margin-top: 20px;
+    }
+    @media (max-width: 1150px) {
+      #results-wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+      #average-stats {
+        width: 100%;
+      }
+      #chart-container {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <img class="logo" src="http://rohitcsc.rf.gd/wp-content/uploads/2025/07/logo-Photoroom-1.png" alt="Logo"/>
+    <h1><i>@Rohit@</i></h1>
+  </header>
+
+  <div class="main-controls-wrapper">
+    <div id="pre-test-controls" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+        <select id="paragraph-type-select">
+          <option value="home_row">home row</option>
+          <option value="upper_row">upper row</option>
+          <option value="home_upper_row">home & upper row</option>
+          <option value="lower_row">lower row</option>
+          <option value="home_lower_row">home & lower row</option>
+          <option value="small">home, upper & lower row</option>
+          <option value="small" selected>Small Characters</option>
+          <option value="mixed">Mix Characters</option>
+          <option value="special">special characters</option>
+        </select>
+        <select id="timer-input">
+          <option value="20">20 second</option>
+          <option value="30" selected>30 second</option>
+          <option value="60">1 Minute</option>
+          <option value="120">2 Minutes</option>
+          <option value="180">3 Minutes</option>
+          <option value="240">4 Minutes</option>
+          <option value="300">5 Minutes</option>
+        </select>
+    </div>
+    <div id="in-test-stats" style="display: none; font-size: 1.2rem; color: #81d4fa; flex-grow: 1; text-align: center;"></div>
+    <div id="countdown-timer"></div>
+    <button id="restart-btn">Restart Test</button>
+  </div>
+
+  <!-- ✅ Typing Area Starts Here -->
+  <div class="typing-box">
+    <div id="text-display" class="text-display"></div>
+  </div>
+
+  <textarea id="input-area" placeholder="Start typing here..."></textarea>
+  
+  <div id="results-wrapper" style="width: 90%; max-width: 1300px; margin-top: 20px; display: none; justify-content: center; align-items: flex-start; gap: 20px;">
+      <div id="average-stats" style="display: flex; flex-direction: column; gap: 15px; background: rgba(17, 20, 38, 0.85); border-radius: 14px; padding: 20px; border: 1px solid rgba(79, 195, 247, 0.2); box-shadow: 0 0 15px rgba(79, 195, 247, 0.2); color: white; width: 240px; text-align: center;">
+          <h3 style="color: #4fc3f7; margin-bottom: 10px; font-size: 1.5rem; text-shadow: 0 0 8px #2196f3;">Result</h3>
+          <div id="avg-wpm-container" title="" style="font-size: 1.2rem; padding: 10px; border-radius: 8px; background: #2a2f4a; transition: background 0.3s; cursor: pointer;">
+              <span style="font-weight: bold; color: #81d4fa;">Average WPM</span><br>
+              <span id="avg-wpm" style="font-size: 2.5rem; font-weight: bold; color: #ffffff;"></span>
+          </div>
+          <div id="avg-accuracy-container" title="" style="font-size: 1.2rem; padding: 10px; border-radius: 8px; background: #2a2f4a; transition: background 0.3s; cursor: pointer;">
+              <span style="font-weight: bold; color: #81d4fa;">Accuracy</span><br>
+              <span id="avg-accuracy" style="font-size: 2.5rem; font-weight: bold; color: #ffffff;"></span>
+          </div>
+          <div id="avg-kpm-container" title="" style="font-size: 1.2rem; padding: 10px; border-radius: 8px; background: #2a2f4a; transition: background 0.3s; cursor: pointer;">
+              <span style="font-weight: bold; color: #81d4fa;">Raw Speed (KPM)</span><br>
+              <span id="avg-kpm" style="font-size: 2.5rem; font-weight: bold; color: #ffffff;"></span>
+          </div>
+      </div>
+      <div id="chart-container" style="flex-grow: 1; background: rgba(17, 20, 38, 0.85); border-radius: 14px; padding: 20px; border: 1px solid rgba(79, 195, 247, 0.2); box-shadow: 0 0 15px rgba(79, 195, 247, 0.2); height: 400px;">
+          <canvas id="resultChart"></canvas>
+      </div>
+  </div>
+
+  <script>
+    let paragraph = '', timer, timeLimit = 60, startTime, chartInstance = null, started = false;
+    let wpmHistory = [], rawSpeedHistory = [], timeLabels = [], fullErrorHistory = [];
+
+    const textDisplay = document.getElementById('text-display');
+    const inputArea = document.getElementById('input-area');
+    const inTestStats = document.getElementById('in-test-stats');
+    const preTestControls = document.getElementById('pre-test-controls');
+    const timerInput = document.getElementById('timer-input');
+    const countdownEl = document.getElementById('countdown-timer');
+    const resultsWrapper = document.getElementById('results-wrapper');
+    const chartContainer = document.getElementById('chart-container');
+    const resultChart = document.getElementById('resultChart');
+    const restartBtn = document.getElementById('restart-btn');
+    const paragraphTypeSelect = document.getElementById('paragraph-type-select');
+    const typingBox = document.querySelector('.typing-box');
+
+    const paragraphs = {
+        small: [
+            'the quick brown fox jumps over the lazy dog a journey of a thousand miles begins with a single step to be or not to be that is the question all that glitters is not gold where there is a will there is a way',
+            'a stitch in time saves nine the early bird catches the worm actions speak louder than words practice makes perfect honesty is the best policy look before you leap',
+            'when in rome do as the romans do fortune favors the bold two heads are better than one the pen is mightier than the sword cleanliness is next to godliness',
+            'jump back with quick form draft zoom the bold mind will track the mask and send the vibe to black bank where shift helps move flash lamp jam zoom calm pack',
+            'the quick draft will move back and zoom with full mask jump over the flash zone where calm hands track the shift and pack bold steps into the mind',
+            'jump into the black zone and bring your draft to the quick bank then shift the mask with calm focus and track every move back to the flash point',
+            'bring your full focus back and start to move quickly into the draft zone pack the flash mask and track your shift with bold calm steps to finish fast',
+            'zoom over the black road with quick hands and shift the draft into the bank mask your mind and bring calm form to track every bold flash back home',
+            'type the draft and move back into the quick track mask the flash zone and bring calm focus pack your bag with bold help and shift every step on time',
+            'start the flash move and jump into the bold zone shift your mind with calm focus track the bank and mask the draft pack up and go quick back home'
+        ],
+        mixed: [
+            'The Quick Brown Fox Jumps Over The Lazy Dog. A Journey Of A Thousand Miles Begins With A Single Step. To Be Or Not To Be, That Is The Question. All That Glitters Is Not Gold. Where There Is A Will, There Is A Way.',
+            'A Stitch In Time Saves Nine. The Early Bird Catches The Worm. Actions Speak Louder Than Words. Practice Makes Perfect. Honesty Is The Best Policy. Look Before You Leap.',
+            'When In Rome, Do As The Romans Do. Fortune Favors The Bold. Two Heads Are Better Than One. The Pen Is Mightier Than The Sword. Cleanliness Is Next To Godliness.'
+        ],
+        special: [
+            'The time is 10:30. Is that correct? I think so! The price is 99.99. Please send the email to "test@example.com".',
+            'The report is 95% complete. We need to check the data for 2023 and 2024. What do you think? Its urgent',
+            'The order number is 12345; please reference it. For support, call 18005550199. The item costs 50.00 & that is final.'
+        ],
+        home_row: [
+          'ask dad to add salad fall as lad asks jack all sad lads ask dak for flask jaffa asks sad fad fall all dash jack said lad lacks skill',
+          'sad jack asks dad all fall flask is sad dak adds salad jazz is fad lad lacks dash ask jack fall all as dad said;',
+          'lad asks jack dak falls jaffa asks fad jack adds flask salad is fad dad said sad lad lacks dash all fall ask dak fast;'
+        ],
+        upper_row: [
+          'we write to you to report our query your input is very proper we type quickly retry it port is quiet write your reply soon;',
+          'our report is quite worthy you try to type out your quote we require your reply retry it quickly write to us soon.', 
+          'type your output we write proper query retry your report it is our duty quote your input we trust you will reply;'
+        ],
+        home_upper_row: [
+          'we just ask you to reply fast your skill is perfect ask jack to write type quickly and look up feel safe to retry now;',
+          'our friend said to write fast all reply quickly keep your duty firm we ask politely jack will type later sure you will;',
+          'type your task ask for your report we just fell back retry and reply keep it safe jack said do it now push to full speed;'
+        ],
+        lower_row: [
+          'zoom back on curb move on mom come by cabin mix vibe vibe back move cab mob buzz back come zone',
+          'move cab back comb men buzz over box move on mob vibe buzz curb move zone back mix men zoom on',
+          'buzz cab move mob vibe box back on come curb men zoom mix vibe men cab move zone comb over'
+        ],
+        home_lower_row: [
+          'dad and mom bake cake from jam box max and sam call back sand fell from bag land has mud calm and bold jack ask for mask;',
+          'black sand and mud fell back jack and sam ask mom flash backs come from land jam is cold ask calm lad to mask fall;',
+          'jack and sam bring cold mask dad fell back. on mud calm bold lad backs off mask jam on land ask dad to come back soon;'
+        ],
+
+    };
+
+    function getParagraph(type) {
+        const paragraphArray = paragraphs[type];
+        let paragraphText = paragraphArray[Math.floor(Math.random() * paragraphArray.length)];
+        return paragraphText.replace(/\s/g, ' ');
+    }
+
+    function loadParagraph() {
+      const paragraphType = paragraphTypeSelect.value;
+      paragraph = getParagraph(paragraphType);
+      textDisplay.innerHTML = '';
+      paragraph.split('').forEach(char => {
+        const span = document.createElement('span');
+        span.textContent = char;
+        textDisplay.appendChild(span);
+      });
+      textDisplay.scrollTop = 0;
+    }
+
+    function appendParagraph() {
+      const paragraphType = paragraphTypeSelect.value;
+      let newParagraph = getParagraph(paragraphType);
+      paragraph += " " + newParagraph;
+      const newSpan = document.createElement('span');
+      newSpan.textContent = " ";
+      textDisplay.appendChild(newSpan);
+      newParagraph.split('').forEach(char => {
+        const span = document.createElement('span');
+        span.textContent = char;
+        textDisplay.appendChild(span);
+      });
+    }
+
+    function calculateStats(elapsed) {
+        const typedText = inputArea.value;
+        const totalTyped = typedText.length;
+        let errors = 0;
+
+        for (let i = 0; i < totalTyped; i++) {
+            if (i >= paragraph.length || typedText[i] !== paragraph[i]) {
+                errors++;
+            }
+        }
+        
+        const correctChars = totalTyped - errors;
+        const accuracy = totalTyped > 0 ? Math.round((correctChars / totalTyped) * 100) : 0;
+        const minutes = elapsed / 60;
+
+        const wpm = minutes > 0 ? Math.round((totalTyped / 5) / minutes) : 0;
+        const kpm = minutes > 0 ? Math.round(totalTyped / minutes) : 0;
+
+        return { accuracy, wpm, kpm, errors };
+    }
+
+    function showChart() {
+      if (chartInstance) chartInstance.destroy();
+      
+      typingBox.style.display = 'none';
+      inputArea.style.display = 'none';
+      inTestStats.style.display = 'none';
+      countdownEl.style.display = 'none';
+      resultsWrapper.style.display = 'flex';
+
+      const totalWpm = wpmHistory.reduce((acc, wpm) => acc + wpm, 0);
+      const averageWpm = wpmHistory.length > 0 ? (totalWpm / wpmHistory.length).toFixed(2) : "0.00";
+
+      const totalKpm = rawSpeedHistory.reduce((acc, kpm) => acc + kpm, 0);
+      const averageKpm = rawSpeedHistory.length > 0 ? (totalKpm / rawSpeedHistory.length).toFixed(2) : "0.00";
+
+      const typedText = inputArea.value;
+      const totalTyped = typedText.length;
+      let errors = 0;
+      for (let i = 0; i < totalTyped; i++) {
+          if (i >= paragraph.length || typedText[i] !== paragraph[i]) {
+              errors++;
+          }
+      }
+      const correctChars = totalTyped - errors;
+      const finalAccuracy = totalTyped > 0 ? ((correctChars / totalTyped) * 100).toFixed(2) : "0.00";
+
+      const avgWpmEl = document.getElementById('avg-wpm');
+      const avgAccuracyEl = document.getElementById('avg-accuracy');
+      const avgKpmEl = document.getElementById('avg-kpm');
+      
+      avgWpmEl.textContent = averageWpm;
+      avgAccuracyEl.textContent = `${finalAccuracy}%`;
+      avgKpmEl.textContent = averageKpm;
+
+      chartInstance = new Chart(resultChart, {
+        type: 'line',
+        data: {
+          labels: timeLabels,
+          datasets: [
+            {
+              label: 'WPM',
+              data: wpmHistory,
+              borderColor: '#4fc3f7',
+              backgroundColor: 'rgba(79, 195, 247, 0.1)',
+              yAxisID: 'y',
+              tension: 0.3
+            },
+            {
+              label: 'Errors',
+              data: fullErrorHistory,
+              borderColor: '#ff5252',
+              backgroundColor: 'rgba(255, 82, 82, 0.1)',
+              yAxisID: 'y1',
+              tension: 0.3,
+              type: 'line'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            title: { display: true, text: 'Typing Performance', color: '#ffffff', font: { size: 18 } },
+            legend: { labels: { color: '#ffffff' } }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Time (seconds)', color: '#ffffff' },
+              ticks: { color: '#ffffff', autoSkip: true, maxTicksLimit: 20 },
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            y: {
+              title: { display: true, text: 'WPM', color: '#4fc3f7' },
+              position: 'left',
+              ticks: { color: '#4fc3f7' },
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.1)' }
+            },
+            y1: {
+              title: { display: true, text: 'Errors', color: '#ff5252' },
+              position: 'right',
+              ticks: { color: '#ff5252', stepSize: 1 },
+              beginAtZero: true,
+              grid: { drawOnChartArea: false }
+            }
+          }
+        }
+      });
+    }
+
+    function startTyping() {
+      if (started) return;
+      started = true;
+      
+      preTestControls.style.display = 'none';
+      inTestStats.style.display = 'block';
+
+      timeLimit = parseInt(timerInput.value) || 60;
+      startTime = new Date();
+      timer = setInterval(() => {
+        const elapsed = (new Date() - startTime) / 1000;
+        const left = Math.max(0, Math.floor(timeLimit - elapsed));
+        countdownEl.textContent = `⏱ Time left: ${left}s`;
+
+        const currentStats = calculateStats(elapsed);
+        inTestStats.textContent = `WPM: ${currentStats.wpm} | Accuracy: ${currentStats.accuracy}% | Errors: ${currentStats.errors}`;
+
+        timeLabels.push(`${Math.floor(elapsed)}s`);
+        wpmHistory.push(currentStats.wpm);
+        rawSpeedHistory.push(currentStats.kpm);
+        fullErrorHistory.push(currentStats.errors);
+
+        if (elapsed >= timeLimit) {
+          clearInterval(timer);
+          countdownEl.textContent = "⏱ Time's up!";
+          inputArea.disabled = true;
+          showChart();
+        }
+      }, 1000);
+    }
+
+    function resetTest() {
+      clearInterval(timer);
+      started = false;
+      inputArea.disabled = false;
+      inputArea.value = '';
+      
+      preTestControls.style.display = 'flex';
+      inTestStats.style.display = 'none';
+      inTestStats.textContent = '';
+
+      countdownEl.textContent = '';
+      timerInput.disabled = false;
+      
+      wpmHistory = [];
+      rawSpeedHistory = [];
+      fullErrorHistory = [];
+      timeLabels = [];
+
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+
+      typingBox.style.display = 'block';
+      inputArea.style.display = 'block';
+      countdownEl.style.display = 'block';
+      resultsWrapper.style.display = 'none';
+      
+      loadParagraph();
+      inputArea.focus();
+    }
+
+    function handleInput() {
+        const spans = textDisplay.querySelectorAll('span');
+        const typedText = inputArea.value;
+
+        spans.forEach((span, i) => {
+            const originalChar = span.textContent;
+            const typedChar = typedText[i];
+
+            span.classList.remove('correct', 'incorrect');
+
+            if (typedChar === undefined) {
+                // Not typed yet
+            } else if (typedChar === originalChar) {
+                span.classList.add('correct');
+            } else {
+                span.classList.add('incorrect');
+            }
+        });
+
+        if (typedText.length > paragraph.length - 50) {
+            appendParagraph();
+        }
+
+        const currentSpan = spans[typedText.length];
+        if (currentSpan) {
+            currentSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    inputArea.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        resetTest();
+        return;
+      }
+      if (!started) {
+        startTyping();
+      }
+    });
+
+    inputArea.addEventListener('input', handleInput);
+
+    restartBtn.addEventListener('click', resetTest);
+    timerInput.addEventListener('change', resetTest);
+    paragraphTypeSelect.addEventListener('change', () => {
+      resetTest();
+    });
+
+    [typingBox, inputArea].forEach(element => {
+        element.addEventListener('mouseenter', () => {
+            typingBox.classList.add('is-hovered');
+            inputArea.classList.add('is-hovered');
+        });
+        element.addEventListener('mouseleave', () => {
+            typingBox.classList.remove('is-hovered');
+            inputArea.classList.remove('is-hovered');
+        });
+    });
+
+    resetTest();
+  </script>
+</body>
+</html>
